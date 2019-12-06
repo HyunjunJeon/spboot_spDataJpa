@@ -1,5 +1,8 @@
 package study.datajpa.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,5 +46,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Member findMemberByUsername(String username); // 단건
     Optional<Member> findOptionalMemberByUsername(String username); // Optional 단건
 
-
+    // Spring Data JPA Paging
+    @Query(value = "select m from Member m left join m.team t",
+            countQuery = "select count(m) from Member m") // 조인이 걸려있는 상황에서 카운트를 구하고 싶으면 따로 카운트 쿼리만 작성해서 성능 향상
+    Page<Member> findByAge(int age, Pageable pageable); // 일반적인 Paging
+    List<Member> findTop3ByAge(int age);
+//    Slice<Member> findByAge(int age, Pageable pageable); // 모바일화면의 '더보기' 처럼 원하는 Paging 개수보다 +1 더 요청해서 가져옴
 }

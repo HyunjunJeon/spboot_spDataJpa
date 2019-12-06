@@ -3,6 +3,10 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -279,5 +283,56 @@ class MemberJpaRepositoryTest {
         // Then
         assertThat(members.size()).isEqualTo(6); // 6 ~ 11번까지 6개 가져옴
         assertThat(totalCount).isEqualTo(11);
+    }
+
+    @Test
+    public void paging_SpringDataJpa(){
+        // given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+        memberRepository.save(new Member("member6", 10));
+        memberRepository.save(new Member("member7", 10));
+        memberRepository.save(new Member("member8", 10));
+        memberRepository.save(new Member("member9", 10));
+        memberRepository.save(new Member("member10", 10));
+        memberRepository.save(new Member("member11", 10));
+
+        // 0페이지에서 3개 가져오고, Sorting 조건은 username으로 내림차순 정렬
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        // when
+        Page<Member> page = memberRepository.findByAge(10, pageRequest);
+//        Slice<Member> slice = memberRepository.findByAge(10, pageRequest);
+
+        // then
+        List<Member> content = page.getContent();
+        /*
+            "반환타입이 Page이기 때문에" totalCnt 쿼리가 자동으로 전송된 것
+            => 성능에 지대한 영향을 끼치는 쿼리임... 전체가 몇개인지 알아야 되기 때문에...
+            특히 조인이 걸리고나면 엄청나게 성능에 악영향을 끼친다
+
+            ---> @Query 에 JPQL로 countQuery Property를 작성하면 된다
+         */
+        long totalCount = page.getTotalElements();
+
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(totalCount).isEqualTo(11);
+        assertThat(page.getNumber()).isEqualTo(0); // 현재페이지 번호
+        assertThat(page.getTotalPages()).isEqualTo(4); // 전체 페이지
+        assertThat(page.isFirst()).isTrue();
+        assertThat(page.hasNext()).isTrue();
+
+//        assertThat(slice.getNumber()).isEqualTo(0); // 현재페이지 번호
+//        assertThat(slice.isFirst()).isTrue();
+//        assertThat(slice.hasNext()).isTrue();
+
+
+        // Entity -> DTO로 변환해서 API Response를 해야함
+        Page<MemberDto> map = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+
+
     }
 }
