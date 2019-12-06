@@ -7,6 +7,10 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter @ToString(of = {"id", "username", "age"})
+@NamedQuery(
+        name="Member.findByUsername",
+        query = "select m from Member m where m.username = :username"
+)
 public class Member {
     @Id @GeneratedValue
     @Column(name = "member_id")
@@ -30,6 +34,11 @@ public class Member {
         if(team != null){
             changeTeam(team);
         }
+    }
+
+    public Member(String username, int age) {
+        this.username = username;
+        this.age = age;
     }
 
     /* 연관관계 메서드 */

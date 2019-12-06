@@ -107,4 +107,68 @@ class MemberJpaRepositoryTest {
         long count2 = memberRepository.count();
         assertThat(count2).isEqualTo(1);
     }
+
+    @Test
+    @Rollback(false)
+    public void findByUsernameAngAgeGreaterThen_JPA(){
+        Member m1 = new Member("aa", 10);
+        Member m2 = new Member("bb", 20);
+
+        memberJpaRepository.save(m1);
+        memberJpaRepository.save(m2);
+
+        List<Member> result = memberJpaRepository.findByUsernameAndAgeGreaterThen("aa", 9);
+
+        assertThat(result.get(0).getUsername()).isEqualTo("aa");
+        assertThat(result.get(0).getAge()).isEqualTo(10);
+        assertThat(result.size()).isEqualTo(1);
+
+    }
+
+    @Test
+    @Rollback(false)
+    public void findByUsernameAngAgeGreaterThen_SpringDataJPA(){
+        Member m1 = new Member("aa", 10);
+        Member m2 = new Member("bb", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findByUsernameAndAgeGreaterThan("aa", 9);
+
+        assertThat(result.get(0).getUsername()).isEqualTo("aa");
+        assertThat(result.get(0).getAge()).isEqualTo(10);
+        assertThat(result.size()).isEqualTo(1);
+
+    }
+
+    @Test
+    @Rollback(false)
+    public void findByUsername_JPA_NamedQuery(){
+        Member m1 = new Member("aa", 10);
+        Member m2 = new Member("bb", 20);
+
+        memberJpaRepository.save(m1);
+        memberJpaRepository.save(m2);
+
+        List<Member> result = memberJpaRepository.findByUsername("aa");
+
+        assertThat(result.get(0).getUsername()).isEqualTo("aa");
+
+    }
+
+    @Test
+    @Rollback(false)
+    public void findByUsername_SpringDataJPA_NamedQuery(){
+        Member m1 = new Member("aa", 10);
+        Member m2 = new Member("bb", 20);
+
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findByUsername("aa");
+
+        assertThat(result.get(0).getUsername()).isEqualTo("aa");
+
+    }
 }
